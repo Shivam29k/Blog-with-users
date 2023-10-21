@@ -9,12 +9,19 @@
     <div class="row gx-4 gx-lg-5 justify-content-center">
       <div class="col-md-10 col-lg-8 col-xl-7">
         <div class="page-heading">
-          {% if msg_sent: %}
-          <h1>Successfully sent your message</h1>
-          {% else: %}
           <h1>Contact Me</h1>
-          {% endif %}
           <span class="subheading">Have questions? I have answers.</span>
+          {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul class="flashes">
+              {% for message in messages %}
+                <p style="color: cornsilk;">
+                  {{ message }}
+                </p>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}  
         </div>
       </div>
     </div>
@@ -129,6 +136,9 @@
               Send
             </button>
           </form>
+          
+            
+          
         </div>
       </div>
     </div>

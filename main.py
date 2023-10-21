@@ -244,15 +244,23 @@ def send_mail(data):
             msg=f"Subject: Contact Details sent via Blogs Website \n\n Name : {data['name']} \nEmail : {data['email']} \nPhone_no : {data['phone_no']} \nMessage : {data['message']}"
         )
 
+
+
+
 @app.route("/contact", methods=["GET", "POST"])
 def contact():
-    mail_status = False
     if request.method == 'POST':
         data = request.form
-        send_mail(data)
-        flash('Message sent successfully', 'success')
-        mail_status = True
-    return render_template("contact.html", current_user=current_user, msg_sent=mail_status)
+        if data['name'] == '' and (data['email']=='' or data['phone_no']==''):
+            flash('Please enter your name and either email or phone number')
+        else:
+            try:
+                send_mail(data)
+                flash('Message sent successfully', 'success')
+            except:
+                flash('No message sent', 'Error')
+
+    return render_template("contact.html", current_user=current_user)
 
 if __name__ == "__main__":
     app.run(debug=True, port=5002)
