@@ -262,5 +262,9 @@ def contact():
 
     return render_template("contact.html", current_user=current_user)
 
+@app.route("/shivam")
+def namecard():
+    return render_template("namecard.html")
+
 if __name__ == "__main__":
     app.run(debug=True, port=5002)
