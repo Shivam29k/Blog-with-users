@@ -9,11 +9,11 @@ from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm
 from sqlalchemy.exc import IntegrityError
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 import os
 import smtplib
 
-load_dotenv()
+# load_dotenv()
 
 MY_MAIL = os.getenv('MY_MAIL')
 EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
