@@ -1,5 +1,5 @@
 from datetime import date as Date
-from flask import Flask, abort, render_template, redirect, url_for, flash, abort
+from flask import Flask, abort, render_template, redirect, url_for, flash, abort, request
 from flask_bootstrap import Bootstrap5
 from flask_ckeditor import CKEditor
 from flask_gravatar import Gravatar
@@ -9,10 +9,14 @@ from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm
 from sqlalchemy.exc import IntegrityError
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 import os
+import smtplib
 
-# load_dotenv()
+load_dotenv()
+
+MY_MAIL = os.getenv('MY_MAIL')
+EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('FLASK_KEY')
@@ -230,9 +234,25 @@ def delete_post(post_id):
 def about():
     return render_template("about.html", current_user=current_user)
 
-@app.route("/contact")
+def send_mail(data):
+    with smtplib.SMTP("smtp.gmail.com", 587) as connection:
+        connection.starttls()
+        connection.login(user=MY_MAIL, password=EMAIL_PASSWORD)
+        connection.sendmail(
+            from_addr=MY_MAIL,
+            to_addrs=MY_MAIL,
+            msg=f"Subject: Contact Details sent via Blogs Website \n\n Name : {data['name']} \nEmail : {data['email']} \nPhone_no : {data['phone_no']} \nMessage : {data['message']}"
+        )
+
+@app.route("/contact", methods=["GET", "POST"])
 def contact():
-    return render_template("contact.html", current_user=current_user)
+    mail_status = False
+    if request.method == 'POST':
+        data = request.form
+        send_mail(data)
+        flash('Message sent successfully', 'success')
+        mail_status = True
+    return render_template("contact.html", current_user=current_user, msg_sent=mail_status)
 
 if __name__ == "__main__":
     app.run(debug=True, port=5002)
