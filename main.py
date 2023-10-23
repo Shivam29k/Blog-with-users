@@ -97,10 +97,9 @@ def admin_only(func):
     return wrapper
 
 def check_admin():
-    if current_user.email == MY_MAIL:
-        return True
-    else:
-        return False
+    if current_user.is_authenticated:
+        if current_user.email == MY_MAIL:
+            return True
 
 # Creating Send mail function
 def send_mail(mail, msg):
