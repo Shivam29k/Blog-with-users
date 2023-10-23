@@ -91,10 +91,16 @@ with app.app_context():
 def admin_only(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        if current_user.id != 1:
+        if current_user.email != MY_MAIL:
             abort(403)  # Forbidden
         return func(*args, **kwargs)
     return wrapper
+
+def check_admin():
+    if current_user.email == MY_MAIL:
+        return True
+    else:
+        return False
 
 # Creating Send mail function
 def send_mail(mail, msg):
@@ -174,7 +180,7 @@ def logout():
 def get_all_posts():
     result = db.session.execute(db.select(BlogPost))
     posts = result.scalars().all()
-    return render_template("index.html", all_posts=posts, current_user=current_user)
+    return render_template("index.html", all_posts=posts, current_user=current_user, admin=check_admin())
 
 
 # logged-in users to comment on posts
@@ -204,7 +210,7 @@ def show_post(post_id):
                     force_lower=False,
                     use_ssl=False,
                     base_url=None)
-    return render_template("post.html", post=requested_post, form=form, current_user=current_user, gravatar=gravatar)
+    return render_template("post.html", post=requested_post, form=form, current_user=current_user, gravatar=gravatar, admin=check_admin())
 
 # TODO: Use a decorator so only an admin user can create a new post
 @app.route("/new-post", methods=["GET", "POST"])
