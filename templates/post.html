@@ -43,11 +43,22 @@
         {{ ckeditor.load() }}
         {{ ckeditor.config(name='comment') }}
         {{ render_form(form, novalidate=True, button_map={"submit": "primary"}) }}
+        {% else %}
+        <div class="d-flex justify-content-end mb-4">
+          <a
+            class="btn btn-primary float-right"
+            href="{{url_for('login')}}"
+            >Login to Comment</a
+          >
+        </div>
         {% endif %}
 
         <div class="comment">
           <!-- Show all the comments on a post -->
           <ul class="commentList">
+            <div class="d-flex justify-content-start mb-4">
+              <h3 class="comment-title">Comments</h3>
+            </div>
             <li>
               {% for comment in post.comments %}
               <div class="commenterImage">

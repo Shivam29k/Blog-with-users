@@ -7,13 +7,14 @@ from flask_login import UserMixin, login_user, LoginManager, current_user, logou
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
-from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm
+from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm, OTPForm
 from sqlalchemy.exc import IntegrityError
-# from dotenv import load_dotenv
+import random
+from dotenv import load_dotenv
 import os
 import smtplib
 
-# load_dotenv()
+load_dotenv()
 
 MY_MAIL = os.getenv('MY_MAIL')
 EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
@@ -86,6 +87,7 @@ class Comment(db.Model):
 with app.app_context():
     db.create_all()
 
+# Creating admin only decorator
 def admin_only(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -94,26 +96,54 @@ def admin_only(func):
         return func(*args, **kwargs)
     return wrapper
 
+# Creating Send mail function
+def send_mail(mail, msg):
+    with smtplib.SMTP("smtp.gmail.com", 587) as connection:
+        connection.starttls()
+        connection.login(user=MY_MAIL, password=EMAIL_PASSWORD)
+        connection.sendmail(
+            from_addr=MY_MAIL,
+            to_addrs=mail,
+            msg=msg
+        )
 
 # Use Werkzeug to hash the user's password when creating a new user.
 @app.route('/register', methods=["GET", "POST"])
 def register():
-    form = RegisterForm()
-    if form.validate_on_submit():
+    registerform = RegisterForm()
+    otpform = OTPForm()
+
+    if registerform.validate_on_submit():
+        global new_user, otp
+        email = registerform.Email.data
         new_user = User(
-            email = form.Email.data,
-            name = form.name.data,
-            password = generate_password_hash(form.Password.data, method='pbkdf2:sha256', salt_length=8)
+            email = registerform.Email.data,
+            name = registerform.name.data,
+            password = generate_password_hash(registerform.Password.data, method='pbkdf2:sha256', salt_length=8)
         )
-        try:
-            db.session.add(new_user)
-            db.session.commit()
-            login_user(new_user)
-            return redirect(url_for('get_all_posts'))
-        except IntegrityError:
-            db.session.rollback()
-            flash('Email address already exists. Please choose a different email address.', 'error')
-    return render_template("register.html", form = form)
+        otp = random.randint(100000, 999999)
+        msg = f"Subject: OTP for Blogs Website \n\n Your OTP is {otp}"
+        send_mail(mail=email, msg=msg)
+        return render_template("register.html", form = otpform)
+
+    if otpform.validate_on_submit():
+        print(otp)
+        if int(otpform.OTP.data) == otp:
+            try:
+                db.session.add(new_user)
+                db.session.commit()
+                login_user(new_user)
+                flash('Account created successfully')
+                return redirect(url_for('get_all_posts'))
+            except IntegrityError:
+                db.session.rollback()
+                flash('Email address already exists. Please login instead.')
+                return redirect(url_for('login'))
+        else:
+            flash("""Retry, OTP did not match. <a href="/register">Register</a>""")
+            return render_template("register.html", form = otpform)
+
+    return render_template("register.html", form = registerform)
 
 
 # Retrieve a user from the database based on their email.
@@ -234,19 +264,6 @@ def delete_post(post_id):
 def about():
     return render_template("about.html", current_user=current_user)
 
-def send_mail(data):
-    with smtplib.SMTP("smtp.gmail.com", 587) as connection:
-        connection.starttls()
-        connection.login(user=MY_MAIL, password=EMAIL_PASSWORD)
-        connection.sendmail(
-            from_addr=MY_MAIL,
-            to_addrs=MY_MAIL,
-            msg=f"Subject: Contact Details sent via Blogs Website \n\n Name : {data['name']} \nEmail : {data['email']} \nPhone_no : {data['phone_no']} \nMessage : {data['message']}"
-        )
-
-
-
-
 @app.route("/contact", methods=["GET", "POST"])
 def contact():
     if request.method == 'POST':
@@ -255,7 +272,8 @@ def contact():
             flash('Please enter your name and either email or phone number')
         else:
             try:
-                send_mail(data)
+                msg = f"Subject: Contact Details sent via Blogs Website \n\n Name : {data['name']} \nEmail : {data['email']} \nPhone_no : {data['phone_no']} \nMessage : {data['message']}"
+                send_mail(mail=MY_MAIL, msg=msg)
                 flash('Message sent successfully', 'success')
             except:
                 flash('No message sent', 'Error')

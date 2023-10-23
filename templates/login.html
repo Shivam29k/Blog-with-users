@@ -26,6 +26,15 @@ include "header.html" %}
         <!--render login form here-->
         {{ render_form(form, novalidate=True, button_map={"submit": "primary"}) }}
       </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        <p>
+          Don't have an account? <a href="{{url_for('register')}}">Register</a>
+          here.
+        </p>
+      </div>
+    </div>
       {% with messages = get_flashed_messages() %}
       {% if messages %}
         <ul class="flashes">
