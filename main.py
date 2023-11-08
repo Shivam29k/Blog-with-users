@@ -16,11 +16,14 @@ import smtplib
 
 # load_dotenv()
 
-MY_MAIL = os.getenv('MY_MAIL')
-EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
+# MY_MAIL = os.getenv('MY_MAIL')
+# EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
+MY_MAIL = 'shivamkg29@gmail.com'
+EMAIL_PASSWORD = 'vzhwkqekruvormqj'
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv('FLASK_KEY')
+# app.config['SECRET_KEY'] = os.getenv('FLASK_KEY')
+app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
 ckeditor = CKEditor(app)
 Bootstrap5(app)
 
@@ -35,7 +38,8 @@ def load_user(user_id):
 
 
 # CONNECT TO DB
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+# app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://nmlwihcxcdncbk:0fb3e6a781344d853eb084415c31471871a33ce65a7cf60da6301d13c031151d@ec2-52-206-36-147.compute-1.amazonaws.com:5432/d7pe513gib0atm'
 db = SQLAlchemy()
 db.init_app(app)
 
