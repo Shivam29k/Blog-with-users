@@ -21,6 +21,7 @@ EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('FLASK_KEY')
+ckeditor = CKEditor(app)
 Bootstrap5(app)
 
 # Flask-Login
