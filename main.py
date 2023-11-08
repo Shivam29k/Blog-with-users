@@ -35,7 +35,7 @@ def load_user(user_id):
 
 
 # CONNECT TO DB
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DB_URI')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 db = SQLAlchemy()
 db.init_app(app)
 
