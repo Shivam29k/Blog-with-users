@@ -289,5 +289,9 @@ def contact():
 def namecard():
     return render_template("namecard.html")
 
+@app.route("/1")
+def answers():
+    return render_template("answers.html")
+
 if __name__ == "__main__":
     app.run(debug=True, port=5002)
